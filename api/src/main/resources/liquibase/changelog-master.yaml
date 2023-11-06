@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - includeAll:
+      path: liquibase/change-logs/common
+  - includeAll:
+      path: liquibase/change-logs/security
+  - includeAll:
+      path: liquibase/change-logs/company
+  - includeAll:
+      path: liquibase/change-logs/location
