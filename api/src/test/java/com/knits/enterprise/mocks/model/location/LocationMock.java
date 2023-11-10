@@ -1,5 +1,6 @@
 package com.knits.enterprise.mocks.model.location;
 
+import com.knits.enterprise.model.common.Address;
 import com.knits.enterprise.model.location.Location;
 import com.knits.enterprise.model.enums.OwnershipType;
 import com.knits.enterprise.model.enums.LocationUsageType;
@@ -20,6 +21,7 @@ public class LocationMock {
                 .ownership(OwnershipType.OUR_PREMISES)
                 .use(LocationUsageType.OFFICE)
                 .active(false)
+                .address(Address.builder().build())
                 .build();
     }
 
