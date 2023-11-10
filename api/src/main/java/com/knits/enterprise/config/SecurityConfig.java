@@ -48,6 +48,7 @@ public class SecurityConfig {
                 .and().
                 authorizeRequests()
                 .antMatchers("/api/login").permitAll()
+                .antMatchers("/swagger-ui/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)

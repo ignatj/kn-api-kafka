@@ -3,26 +3,21 @@ package com.knits.enterprise.service.location;
 import com.knits.enterprise.dto.data.location.LocationDto;
 import com.knits.enterprise.dto.search.location.LocationSearchDto;
 import com.knits.enterprise.exceptions.UserException;
-import com.knits.enterprise.mapper.common.AddressMapper;
-import com.knits.enterprise.mapper.common.AddressMapperImpl;
-import com.knits.enterprise.mapper.common.CountryMapper;
-import com.knits.enterprise.mapper.common.CountryMapperImpl;
 import com.knits.enterprise.mapper.location.LocationMapper;
+import com.knits.enterprise.model.common.Address;
+import com.knits.enterprise.model.common.Country;
 import com.knits.enterprise.model.location.Location;
+import com.knits.enterprise.repository.common.AddressRepository;
+import com.knits.enterprise.repository.common.CountryRepository;
 import com.knits.enterprise.repository.location.LocationRepository;
 import com.knits.enterprise.service.common.GenericService;
 import com.knits.enterprise.service.security.UserService;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -31,12 +26,20 @@ import java.util.List;
 public class LocationService extends GenericService {
 
     private final LocationRepository repository;
+    private final AddressRepository addressRepository;
+    private final CountryRepository countryRepository;
 
     private final LocationMapper locationMapper;
 
-    public LocationService(UserService userService, LocationRepository repository, LocationMapper locationMapper) {
+    public LocationService(UserService userService,
+                           LocationRepository repository,
+                           AddressRepository addressRepository,
+                           CountryRepository countryRepository,
+                           LocationMapper locationMapper) {
         super(userService);
         this.repository = repository;
+        this.addressRepository = addressRepository;
+        this.countryRepository = countryRepository;
         this.locationMapper = locationMapper;
     }
 
@@ -44,16 +47,19 @@ public class LocationService extends GenericService {
         String operationLog ="Request to create Location : %s".formatted(locationDto.toString());
         logCurrentUser(operationLog);
 
-        String locationName =locationDto.getName();
-        if (repository.findOneByName(locationName).isPresent()){
-            throw new UserException("Location with name %s already exists".formatted(locationName));
+        Country country = countryRepository.findFirstByName(locationDto.getAddress().getCountry().getName());
+        if (country == null) {
+            throw new UserException("Invalid country name provided");
         }
-
         Location location = locationMapper.toEntity(locationDto);
+        Address address = location.getAddress();
+        address.setCountry(country);
+
         location.setCreatedBy(getCurrentUserAsEntity());
-        location.setStartDate(LocalDateTime.now());
-        location.setActive(true);
-        return locationMapper.toDto( repository.save(location));
+
+        addressRepository.save(address);
+        repository.save(location);
+        return locationMapper.toDto(location);
     }
 
     public LocationDto update(LocationDto locationDto){
@@ -77,8 +83,8 @@ public class LocationService extends GenericService {
         return locationMapper.toDto(location);
     }
 
-    public void delete(Long id){
-        log.debug("Set status deleted = true to Location Id: {}", id);
+    public void deactivate(Long id){
+        log.debug("Set status deactivated = true to Location Id: {}", id);
         repository.deleteById(id);}
 
     public Page<LocationDto> search(LocationSearchDto locationSearch) {

@@ -1,13 +1,18 @@
 package com.knits.enterprise.controller.common;
 
 import com.knits.enterprise.dto.data.common.ExceptionDto;
+import com.knits.enterprise.dto.data.common.ValidationErrorDto;
 import com.knits.enterprise.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 
 @ControllerAdvice
 @Slf4j
@@ -23,6 +28,26 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ResponseEntity<ExceptionDto> handleUserException(UserException ex) {
         return wrapIntoResponseEntity(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseBody
+    public ResponseEntity<ValidationErrorDto> onConstraintViolationException(ConstraintViolationException e) {
+        ValidationErrorDto validationErrorDto = new ValidationErrorDto();
+        for (ConstraintViolation violation: e.getConstraintViolations()) {
+            validationErrorDto.addViolation(violation.getPropertyPath().toString(), violation.getMessage());
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationErrorDto);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseBody
+    public ResponseEntity<ValidationErrorDto> handleValidationErrors(MethodArgumentNotValidException ex) {
+        ValidationErrorDto validationErrorDto = new ValidationErrorDto();
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            validationErrorDto.addViolation(error.getField(), error.getDefaultMessage());
+        });
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationErrorDto);
     }
 
     @ExceptionHandler(SystemException.class)

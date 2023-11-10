@@ -6,6 +6,7 @@ import com.knits.enterprise.model.common.Country;
 public class AddressMock {
     public static Address shallowAddressMock(Long id) {
         return Address.builder()
+                .id(id)
                 .country(new Country())
                 .city("city Mock")
                 .postalCode("123456")

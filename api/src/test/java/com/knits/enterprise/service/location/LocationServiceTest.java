@@ -1,6 +1,7 @@
 package com.knits.enterprise.service.location;
 
 import com.knits.enterprise.dto.data.location.LocationDto;
+import com.knits.enterprise.dto.data.security.UserDto;
 import com.knits.enterprise.mapper.common.AddressMapper;
 import com.knits.enterprise.mapper.common.AddressMapperImpl;
 import com.knits.enterprise.mapper.common.CountryMapper;
@@ -9,10 +10,15 @@ import com.knits.enterprise.mapper.location.LocationMapper;
 import com.knits.enterprise.mapper.location.LocationMapperImpl;
 import com.knits.enterprise.mocks.dto.location.LocationDtoMock;
 import com.knits.enterprise.mocks.dto.security.UserDtoMock;
+import com.knits.enterprise.mocks.model.common.AddressMock;
 import com.knits.enterprise.mocks.model.location.LocationMock;
 import com.knits.enterprise.mocks.model.security.UserMock;
+import com.knits.enterprise.model.common.Address;
 import com.knits.enterprise.model.company.Employee;
 import com.knits.enterprise.model.location.Location;
+import com.knits.enterprise.model.security.User;
+import com.knits.enterprise.repository.common.AddressRepository;
+import com.knits.enterprise.repository.common.CountryRepository;
 import com.knits.enterprise.repository.location.LocationRepository;
 import com.knits.enterprise.service.security.UserService;
 import org.junit.jupiter.api.DisplayName;
@@ -40,8 +46,17 @@ class LocationServiceTest {
     @Mock
     UserService userService;
 
+    @Mock
+    CountryRepository countryRepository;
+
+    @Mock
+    LocationMapper locationMapper;
+
     @Spy
     private LocationMapper mapper = new LocationMapperImpl();
+
+    @Mock
+    AddressRepository addressRepository;
 
     @Captor
     private ArgumentCaptor<Location> locationCaptor;
@@ -49,44 +64,38 @@ class LocationServiceTest {
     @InjectMocks
     LocationService service;
 
-    @BeforeEach
-    private void iniMapperDependencies(){
-        AddressMapper addressMapper = new AddressMapperImpl();
-        CountryMapper countryMapper = new CountryMapperImpl();
-
-        ReflectionTestUtils.setField(addressMapper,"countryMapper",countryMapper);
-        ReflectionTestUtils.setField(mapper,"addressMapper",addressMapper);
-    }
-
     @Test
     @DisplayName("Save Location Success")
     void saveSuccess() {
-
-        final Long mockId=1L;
-        final Long locationGeneratedId=1L;
         LocationDto toSaveDto = LocationDtoMock.shallowLocationDto(null);
+        Address toSaveAddress = AddressMock.shallowAddressMock(null);
+        Location toSaveLocation = LocationMock.shallowLocation(null);
+        UserDto userDto = UserDtoMock.shallowUserDto(null);
+        User user = UserMock.shallowUser(null);
 
+        when(userService.getCurrentUserAsDto()).thenReturn(userDto);
+        when(countryRepository.findFirstByName(Mockito.any(String.class)))
+                .thenReturn(toSaveAddress.getCountry());
+        when(locationMapper.toEntity(Mockito.any(LocationDto.class)))
+                .thenReturn(toSaveLocation);
+        when(userService.getCurrentUserAsEntity()).thenReturn(user);
+        when(addressRepository.save(Mockito.any(Address.class)))
+                .thenReturn(toSaveAddress);
         when(repository.save(Mockito.any(Location.class)))
-                .thenAnswer(invocation -> {
-                    Location location = (Location)invocation.getArgument(0);
-                    location.setId(locationGeneratedId);
-                    return location;
-                });
+                .thenAnswer(invocation -> invocation.getArguments()[0]);
+        when(locationMapper.toDto(Mockito.any(Location.class)))
+                .thenReturn(toSaveDto);
 
-        when(userService.getCurrentUserAsDto()).thenReturn(UserDtoMock.shallowUserDto(1L));
+        service.create(toSaveDto);
 
-        LocationDto savedDto= service.create(toSaveDto);
-
-        verify(repository).save(locationCaptor.capture());
-        Location toSaveEntity = locationCaptor.getValue();
-
-        verify(mapper, times(1)).toEntity(toSaveDto);
+        verify(countryRepository, times(1))
+                .findFirstByName(toSaveDto.getAddress().getCountry().getName());
+        verify(locationMapper, times(1)).toEntity(toSaveDto);
         verify(userService, times(1)).getCurrentUserAsEntity();
-        verify(repository, times(1)).save(toSaveEntity);
-        verify(mapper, times(1)).toDto(toSaveEntity);
-
-        assertThat(toSaveDto.getName()).isEqualTo(savedDto.getName());
-
+        verify(addressRepository, times(1)).save(toSaveLocation.getAddress());
+        verify(repository).save(locationCaptor.capture());
+        Location capturedLocation = locationCaptor.getValue();
+        verify(locationMapper, times(1)).toDto(capturedLocation);
     }
 
     @Test

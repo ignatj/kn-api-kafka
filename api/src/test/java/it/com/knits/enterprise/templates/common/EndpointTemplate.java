@@ -95,7 +95,17 @@ public abstract class EndpointTemplate {
                 request.get(getEndpointUrl() + "?" + queryString) :
                 request.get(getEndpointUrl());
 
-        assertThat(response.getStatusCode()).isEqualTo(200);
+        assertThat(response.getStatusCode()).isEqualTo(expectedHttpCode);
+        return response;
+    }
+
+    protected <T> Response httpGetQueryBody(String token, T body, int expectedHttpCode) {
+
+        RequestSpecification request = setupRequest(token, body);
+
+        Response response = request.get(getEndpointUrl() + "/search");
+
+        assertThat(response.getStatusCode()).isEqualTo(expectedHttpCode);
         return response;
     }
 

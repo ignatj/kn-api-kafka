@@ -18,8 +18,8 @@ public class UserTemplate extends EndpointTemplate {
         RequestSpecification request = RestAssured.given();
         request.header("Content-Type", "application/json");
         request.body(getCurrentUser());
-        System.out.println("Send request to "+getBaseUrl()+"/login");
-        Response response = request.post(getBaseUrl()+"/login");
+        System.out.println("Send request to "+getBaseUrl()+"/api/login");
+        Response response = request.post(getBaseUrl()+"/api/login");
         assertThat(response.getStatusCode()).isEqualTo(ItTestConsts.HTTP_SUCCESS);
         return response.getBody().as(UserDto.class);
     }
