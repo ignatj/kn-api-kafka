@@ -75,6 +75,14 @@ public abstract class EndpointTemplate {
         return response;
     }
 
+    protected <T> Response httpGet(String token, int expectedHttpCode) {
+
+        RequestSpecification request = setupRequest(token);
+        Response response = request.get(getEndpointUrl());
+        assertThat(response.getStatusCode()).isEqualTo(expectedHttpCode);
+        return response;
+    }
+
     protected <T> Response httpGetPathParams(String token, String pathParams, int expectedHttpCode) {
 
         RequestSpecification request = setupRequest(token);
