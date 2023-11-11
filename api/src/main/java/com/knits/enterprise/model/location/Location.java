@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 import static javax.persistence.FetchType.LAZY;
 
@@ -47,5 +48,8 @@ public class Location extends AbstractAuditableEntity {
     @Column(name = "use")
     @Enumerated(EnumType.STRING)
     private LocationUsageType use;
+
+    @OneToMany(mappedBy = "location")
+    private List<Building> buildings;
 
 }

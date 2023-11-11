@@ -22,6 +22,7 @@ public class LocationMock {
                 .use(LocationUsageType.OFFICE)
                 .active(false)
                 .address(Address.builder().build())
+                .buildings(new ArrayList<>())
                 .build();
     }
 
