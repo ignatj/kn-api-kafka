@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
+import java.util.List;
 
 import static javax.persistence.FetchType.LAZY;
 
@@ -35,8 +36,16 @@ public class Building extends AbstractActiveEntity {
     @JoinColumn(name = "location_id")
     private Location location;
 
+    @OneToMany(mappedBy = "building")
+    private List<Floor> floors;
+
     public void addLocation(Location location) {
         location.getBuildings().add(this);
         this.location = location;
+    }
+
+    public void addFloor(Floor floor) {
+        floors.add(floor);
+        floor.setBuilding(this);
     }
 }
