@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
+import java.util.List;
 
 import static javax.persistence.FetchType.LAZY;
 
@@ -42,4 +43,12 @@ public class Floor extends AbstractAuditableEntity {
 
     @Column(name = "toilets")
     private Integer toilets;
+
+    @OneToMany(mappedBy = "floor")
+    private List<WorkingArea> workingAreas;
+
+    public void addWorkingArea(WorkingArea workingArea) {
+        workingAreas.add(workingArea);
+        workingArea.setFloor(this);
+    }
 }
