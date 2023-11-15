@@ -15,6 +15,7 @@ public class FloorMock {
                 .use(LocationUsageType.WAREHOUSE)
                 .number(4)
                 .workingAreas(new ArrayList<>())
+                .rooms(new ArrayList<>())
                 .building(BuildingMock.shallowBuilding(null))
                 .build();
     }
