@@ -47,8 +47,16 @@ public class Floor extends AbstractAuditableEntity {
     @OneToMany(mappedBy = "floor")
     private List<WorkingArea> workingAreas;
 
+    @OneToMany(mappedBy = "floor")
+    private List<Room> rooms;
+
     public void addWorkingArea(WorkingArea workingArea) {
         workingAreas.add(workingArea);
         workingArea.setFloor(this);
+    }
+
+    public void addRoom(Room room) {
+        rooms.add(room);
+        room.setFloor(this);
     }
 }
