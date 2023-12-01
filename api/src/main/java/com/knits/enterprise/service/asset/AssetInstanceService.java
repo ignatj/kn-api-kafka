@@ -1,5 +1,6 @@
 package com.knits.enterprise.service.asset;
 
+import com.knits.enterprise.config.Constants;
 import com.knits.enterprise.dto.data.asset.AssetInstanceDto;
 import com.knits.enterprise.exceptions.UserException;
 import com.knits.enterprise.mapper.asset.AssetInstanceMapper;
@@ -14,9 +15,13 @@ import com.knits.enterprise.repository.location.LocationRepository;
 import com.knits.enterprise.repository.location.WorkingAreaRepository;
 import com.knits.enterprise.service.common.GenericService;
 import lombok.AllArgsConstructor;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -34,6 +39,7 @@ public class AssetInstanceService extends GenericService {
     private final LocationRepository locationRepository;
     private final BuildingRepository buildingRepository;
     private final WorkingAreaRepository workingAreaRepository;
+    private final IOTMetricDataRepository iotMetricDataRepository;
 
     public AssetInstanceDto create(AssetInstanceDto assetInstanceDto) {
         String operationLog ="Request to create assetInstance : %s".formatted(assetInstanceDto.toString());
@@ -106,5 +112,24 @@ public class AssetInstanceService extends GenericService {
     public List<AssetInstanceDto> getAllActive() {
         return assetInstanceMapper.toDtos(assetInstanceRepository.findAllActive());
     }
+
+    @KafkaListener(topics = "AmmoliteSensorData")
+    public void receiveAssetMetrics(@Payload String metricData,
+                                    @Header("sensor_timestamp") String timestamp,
+                                    @Header("machine_id") String machineId,
+                                    @Header("device_id") String deviceId,
+                                    @Header("status") String status,
+                                    @Header("metric_name") String metricName) {
+        IOTMetricData iotMetricData = IOTMetricData.builder()
+                .timestamp(LocalDateTime.parse(timestamp, Constants.TIME_FORMATTER))
+                .machine(assetInstanceRepository.getById(Long.valueOf(machineId)))
+                .device(assetInstanceRepository.getById(Long.valueOf(deviceId)))
+                .status(status)
+                .metricName(metricName)
+                .metricJsonPayload(metricData)
+                .build();
+        iotMetricDataRepository.save(iotMetricData);
+    }
+
 
 }

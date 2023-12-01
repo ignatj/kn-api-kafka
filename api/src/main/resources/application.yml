@@ -30,6 +30,12 @@ spring:
     multipart:
       max-file-size: ${MAX_FILE_SIZE}
       max-request-size: ${MAX_REQUEST_SIZE}
+
+  kafka:
+    bootstrap-servers: "localhost:8099,localhost:8098,localhost:8097"
+    consumer:
+      group-id: "sensor-listener-group"
+
 server:
   port: ${SERVER_PORT}
 
