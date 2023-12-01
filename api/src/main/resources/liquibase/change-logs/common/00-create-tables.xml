@@ -542,4 +542,112 @@
                                  referencedColumnNames="id"/>
     </changeSet>
 
+    <changeSet id="28.11.2023 create table for Category" author="ignat jasevits">
+        <createTable tableName="category">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="asset_tech_spec_pkey"/>
+            </column>
+            <column name="active" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_category_id" type="BIGINT"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="category" baseColumnNames="parent_category_id" constraintName="fk_category_parent_category_id" referencedTableName="category"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="28.11.2023 create table for AssetModel" author="ignat jasevits">
+        <createTable tableName="asset_model">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="asset_model_pkey"/>
+            </column>
+            <column name="active" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="end_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="manufacturer" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="model" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="code" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_url" type="VARCHAR(255)"/>
+            <column name="photo_url" type="VARCHAR(255)"/>
+            <column name="category_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_model_id" type="BIGINT"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="asset_model" baseColumnNames="category_id" constraintName="fk_asset_model_category_id" referencedTableName="category"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="28.11.2023 create table for AssetInstance" author="ignat jasevits">
+        <createTable tableName="asset_instance">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="asset_instance_pkey"/>
+            </column>
+            <column name="active" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="end_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="asset_model_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="serial_number" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="barcode" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="key" type="VARCHAR(255)"/>
+            <column name="condition" type="VARCHAR(255)"/>
+            <column name="state" type="VARCHAR(255)"/>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="parent_asset_instance_id" type="BIGINT"/>
+            <column name="ownership_type" type="VARCHAR(255)"/>
+            <column name="vendor_id" type="BIGINT"/>
+            <column name="purchase_order_code" type="VARCHAR(255)"/>
+            <column name="depreciable_asset" type="BOOLEAN"/>
+            <column name="warranty_number" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="warranty_start_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="warranty_end_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="service_provider" type="VARCHAR(255)"/>
+            <column name="location_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="building_id" type="BIGINT"/>
+            <column name="working_area_id" type="BIGINT"/>
+            <column name="order_id" type="BIGINT"/>
+            <column name="depreciation_id" type="BIGINT"/>
+            <column name="warranty_template_id" type="BIGINT"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="asset_instance" baseColumnNames="asset_model_id" constraintName="fk_instance_model" referencedTableName="asset_model"
+                                 referencedColumnNames="id"/>
+    </changeSet>
 </databaseChangeLog>

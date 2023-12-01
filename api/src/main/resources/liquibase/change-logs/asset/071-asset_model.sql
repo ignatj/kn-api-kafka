@@ -1,0 +1,5 @@
+insert into asset_model (id, active, start_date, end_date, created_by, manufacturer, model, code, category_id) values (1, true, '2022-11-27', null, 1000, 'Ferrari', 'Enzo', 'qwerty123', 2);
+insert into asset_model (id, active, start_date, end_date, created_by, manufacturer, model, code, category_id) values (2, true, '2022-11-27', null, 1000, 'Panasonic', 'TemperatureV1', 'qwerty124', 4);
+insert into asset_model (id, active, start_date, end_date, created_by, manufacturer, model, code, category_id) values (3, true, '2022-11-27', null, 1000, 'Panasonic', 'VibrationsV1', 'qwerty125', 4);
+insert into asset_model (id, active, start_date, end_date, created_by, manufacturer, model, code, category_id) values (4, true, '2022-11-27', null, 1000, 'Panasonic', 'PressureV1', 'qwerty126', 4);
+insert into asset_model (id, active, start_date, end_date, created_by, manufacturer, model, code, category_id) values (5, true, '2022-11-27', null, 1000, 'Panasonic', 'HumidityV1', 'qwerty127', 4);

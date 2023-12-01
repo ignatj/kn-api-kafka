@@ -7,3 +7,5 @@ databaseChangeLog:
       path: liquibase/change-logs/company
   - includeAll:
       path: liquibase/change-logs/location
+  - includeAll:
+      path: liquibase/change-logs/asset
