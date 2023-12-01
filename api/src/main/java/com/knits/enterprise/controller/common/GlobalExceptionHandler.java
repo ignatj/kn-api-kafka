@@ -27,6 +27,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserException.class)
     @ResponseBody
     public ResponseEntity<ExceptionDto> handleUserException(UserException ex) {
+        if (ex.getCode() != null) {
+            return wrapIntoResponseEntity(ex, HttpStatus.resolve(ex.getCode()));
+        }
         return wrapIntoResponseEntity(ex, HttpStatus.BAD_REQUEST);
     }
 

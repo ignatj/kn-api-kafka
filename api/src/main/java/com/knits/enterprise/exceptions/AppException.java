@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper=false)
 public class AppException extends RuntimeException{
 
-    private int code;
+    private Integer code;
 
     public AppException(String message,int code){
         super(message);
