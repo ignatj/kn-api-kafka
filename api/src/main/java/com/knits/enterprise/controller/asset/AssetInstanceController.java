@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @AllArgsConstructor
@@ -73,5 +74,13 @@ public class AssetInstanceController {
     public ResponseEntity<List<AssetInstanceDto>> getAllActive() {
         log.debug("Http request to get all {}",ENDPOINT_NAME);
         return ResponseEntity.ok().body(assetInstanceService.getAllActive());
+    }
+
+    @Operation(summary = "Create Kafka topic for parent instance")
+    @ApiResponse(responseCode = "204", description = "Topic created")
+    @PreAuthorize("hasAuthority('Employee')")
+    public ResponseEntity<Void> createTopicForInstance(@PathVariable Long parentId) throws ExecutionException, InterruptedException {
+        assetInstanceService.createTopicForInstance(parentId);
+        return ResponseEntity.noContent().build();
     }
 }

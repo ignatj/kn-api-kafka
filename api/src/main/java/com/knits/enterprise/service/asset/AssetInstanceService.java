@@ -15,6 +15,9 @@ import com.knits.enterprise.repository.location.LocationRepository;
 import com.knits.enterprise.repository.location.WorkingAreaRepository;
 import com.knits.enterprise.service.common.GenericService;
 import lombok.AllArgsConstructor;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.common.config.TopicConfig;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -22,7 +25,9 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @Transactional
@@ -40,6 +45,7 @@ public class AssetInstanceService extends GenericService {
     private final BuildingRepository buildingRepository;
     private final WorkingAreaRepository workingAreaRepository;
     private final IOTMetricDataRepository iotMetricDataRepository;
+    private final AdminClient adminClient;
 
     public AssetInstanceDto create(AssetInstanceDto assetInstanceDto) {
         String operationLog ="Request to create assetInstance : %s".formatted(assetInstanceDto.toString());
@@ -113,7 +119,7 @@ public class AssetInstanceService extends GenericService {
         return assetInstanceMapper.toDtos(assetInstanceRepository.findAllActive());
     }
 
-    @KafkaListener(topics = "AmmoliteSensorData")
+    @KafkaListener(topicPattern = "assetId:\\d+")
     public void receiveAssetMetrics(@Payload String metricData,
                                     @Header("sensor_timestamp") String timestamp,
                                     @Header("machine_id") String machineId,
@@ -131,5 +137,26 @@ public class AssetInstanceService extends GenericService {
         iotMetricDataRepository.save(iotMetricData);
     }
 
+    public void createTopicForInstance(Long parentId) throws ExecutionException, InterruptedException {
+        int defaultPartitions = 3;
+        short defaultReplicas = 3;
+        String defaultISRReplicas = "2";
 
+        AssetInstance assetInstance = assetInstanceRepository.findById(parentId)
+                .orElseThrow(() -> new UserException("Wrong asset parent id provided"));
+
+        if (assetInstance.getParent() != null) {
+            throw new UserException("Only parent asset instance can have topic assigned");
+        }
+
+        String topicName = "assetId:" + String.valueOf(parentId);
+
+        if (adminClient.listTopics().names().get().contains(topicName)) {
+            throw new UserException("Topic for provided instance already exists");
+        }
+
+        NewTopic newTopic = new NewTopic(topicName, defaultPartitions, defaultReplicas);
+        newTopic.configs(Collections.singletonMap(TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG, defaultISRReplicas));
+        adminClient.createTopics(Collections.singletonList(newTopic));
+    }
 }
