@@ -119,7 +119,7 @@ public class AssetInstanceService extends GenericService {
         return assetInstanceMapper.toDtos(assetInstanceRepository.findAllActive());
     }
 
-    @KafkaListener(topicPattern = "assetId:\\d+")
+    @KafkaListener(topicPattern = "assetId-\\d+", properties = "metadata.max.age.ms:6000")
     public void receiveAssetMetrics(@Payload String metricData,
                                     @Header("sensor_timestamp") String timestamp,
                                     @Header("machine_id") String machineId,
@@ -149,7 +149,7 @@ public class AssetInstanceService extends GenericService {
             throw new UserException("Only parent asset instance can have topic assigned");
         }
 
-        String topicName = "assetId:" + String.valueOf(parentId);
+        String topicName = "assetId-" + String.valueOf(parentId);
 
         if (adminClient.listTopics().names().get().contains(topicName)) {
             throw new UserException("Topic for provided instance already exists");
@@ -157,6 +157,6 @@ public class AssetInstanceService extends GenericService {
 
         NewTopic newTopic = new NewTopic(topicName, defaultPartitions, defaultReplicas);
         newTopic.configs(Collections.singletonMap(TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG, defaultISRReplicas));
-        adminClient.createTopics(Collections.singletonList(newTopic));
+        adminClient.createTopics(Collections.singletonList(newTopic)).all().get();
     }
 }

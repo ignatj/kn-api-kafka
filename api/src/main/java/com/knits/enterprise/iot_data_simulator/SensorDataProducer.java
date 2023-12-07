@@ -101,7 +101,7 @@ public class SensorDataProducer {
         String timestamp = LocalDateTime.now().format(Constants.TIME_FORMATTER);
         return MessageBuilder
                 .withPayload(jsonPayload)
-                .setHeader(KafkaHeaders.TOPIC, "AmmoliteSensorData")
+                .setHeader(KafkaHeaders.TOPIC, "assetId-1")
                 .setHeader("sensor_timestamp", timestamp)
                 .setHeader("machine_id", CAR_ASSET_ID)
                 .setHeader("device_id", deviceId)

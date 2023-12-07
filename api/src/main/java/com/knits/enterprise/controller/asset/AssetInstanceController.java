@@ -77,6 +77,7 @@ public class AssetInstanceController {
     }
 
     @Operation(summary = "Create Kafka topic for parent instance")
+    @PostMapping(value = ENDPOINT_NAME + "/topic/{parentId}")
     @ApiResponse(responseCode = "204", description = "Topic created")
     @PreAuthorize("hasAuthority('Employee')")
     public ResponseEntity<Void> createTopicForInstance(@PathVariable Long parentId) throws ExecutionException, InterruptedException {

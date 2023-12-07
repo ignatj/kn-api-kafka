@@ -1,0 +1,1 @@
+update asset_instance set parent_asset_instance_id = 1 where id between 2 and 5;

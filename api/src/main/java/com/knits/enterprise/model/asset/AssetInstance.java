@@ -69,7 +69,7 @@ public class AssetInstance extends AbstractAuditableEntity {
     @Column(name = "purchase_order_code")
     private String purchaseOrderCode;
 
-    @Column(name = "depreciable_ssset", columnDefinition = "boolean default true")
+    @Column(name = "depreciable_asset", columnDefinition = "boolean default true")
     private Boolean depreciableAsset;
 
     @Column(name = "warranty_number", nullable = false)
